@@ -1,8 +1,8 @@
 package com.example.controller;
 
 import com.example.MyTelegramBot;
-import com.example.entity.StudentProfileEntity;
-import com.example.entity.TeacherProfileEntity;
+import com.example.entity.ProfileEntity;
+import com.example.enums.ProfileRole;
 import com.example.enums.ProfileStep;
 import com.example.repository.StudentRepository;
 import com.example.repository.TeacherRepository;
@@ -19,14 +19,15 @@ public class StudentController {
         if (message.getText().equals("\uD83C\uDF93 Imtihon topshiruvchi")){
             studentService.enterExamId(message);
         } else if (message.getText().equals("❌ Bekor qilish")) {
-            StudentProfileEntity studentProfileEntity = studentRepository.findById(message.getChatId());
-            studentProfileEntity.setStep(ProfileStep.DONE);
-            studentProfileEntity.setVisible(Boolean.FALSE);
-            studentRepository.update(studentProfileEntity);
+            ProfileEntity entity = studentRepository.findById(message.getChatId());
+            entity.setStep(ProfileStep.DONE);
+            entity.setVisible(Boolean.FALSE);
+            entity.setRole(ProfileRole.DONE);
+            studentRepository.update(entity);
             message.setText("/start");
             mainController.handle(message);
         }else if (studentRepository.findById(message.getChatId()).getStep().equals(ProfileStep.ENTER_EXAM_ID)) {
-            TeacherProfileEntity teacherProfileEntity = teacherRepository.findByExamId(Integer.valueOf(message.getText()));
+            ProfileEntity teacherProfileEntity = teacherRepository.findByExamId(Integer.valueOf(message.getText()));
             if (teacherProfileEntity != null && !teacherProfileEntity.getStep().equals(ProfileStep.DONE) && message.getText().matches("^[0-9]+$")){
                 studentService.enterName(message);
             }else {

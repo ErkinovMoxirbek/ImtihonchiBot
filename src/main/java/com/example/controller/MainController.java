@@ -1,7 +1,8 @@
 package com.example.controller;
 
 import com.example.MyTelegramBot;
-import com.example.entity.TeacherProfileEntity;
+import com.example.entity.ProfileEntity;
+import com.example.enums.ProfileRole;
 import com.example.enums.ProfileStep;
 import com.example.repository.StudentRepository;
 import com.example.repository.TeacherRepository;
@@ -24,7 +25,7 @@ public class MainController {
     public void handle(Message message){
         if (message.getText() == null ){
             if (message.hasDocument()&& teacherRepository.findById(message.getChatId())!=null && teacherRepository.findById(message.getChatId()).getStep().equals(ProfileStep.ENTER_EXEL)){
-                TeacherProfileEntity entity = teacherRepository.findById(message.getChatId());
+                ProfileEntity entity = teacherRepository.findById(message.getChatId());
                 String [] fileName = message.getDocument().getFileName().split("\\.");
                 if(teacherRepository.findByFileName(message.getDocument().getFileName()) != null){
                     Document document = message.getDocument();
@@ -49,7 +50,7 @@ public class MainController {
             myTelegramBot.sendMessage("Assalomu alaykum bo'limlarni birini tanlang!",message.getChatId(), ReplyKeyboardUtil.menuKeyboard());
         } else if (message.getText().equals("\uD83D\uDC68\u200D\uD83C\uDFEB Imtihon o'tkazuvchi")) {
             teacherController.handle(message,this);
-        }else if (teacherRepository.findById(message.getChatId()) != null){
+        }else if (teacherRepository.findByIdAndRole(message.getChatId(), ProfileRole.TEACHER) != null){
             if (teacherRepository.findById(message.getChatId()).getStep().equals(ProfileStep.ENTER_GROUP) ||
                     teacherRepository.findById(message.getChatId()).getStep().equals(ProfileStep.ENTER_EXEL) ||
                     teacherRepository.findById(message.getChatId()).getStep().equals(ProfileStep.EXAM)){
@@ -57,7 +58,7 @@ public class MainController {
             }
         }else if (message.getText().equals("\uD83C\uDF93 Imtihon topshiruvchi")){
             studentController.handle(message,this);
-        } else if (studentRepository.findById(message.getChatId()) != null) {
+        } else if (studentRepository.findByIdAndRole(message.getChatId(),ProfileRole.STUDENT) != null) {
             if (studentRepository.findById(message.getChatId()).getStep().equals(ProfileStep.ENTER_EXAM_ID)){
                 studentController.handle(message,this);
             } else if (studentRepository.findById(message.getChatId()).getStep().equals(ProfileStep.ENTER_NAME)) {

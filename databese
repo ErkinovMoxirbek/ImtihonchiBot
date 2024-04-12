@@ -1,0 +1,20 @@
+CREATE TABLE profile (
+    id SERIAL PRIMARY KEY, -- Primary key for the table with auto-incrementing ID
+    profile_id BIGINT NOT NULL, -- Column to store profile ID
+    name TEXT, -- Column to store the name
+    surname TEXT, -- Column to store the surname
+    group_name VARCHAR(255), -- Column to store the group name (suitable length for group name)
+    student_count INTEGER DEFAULT 0, -- Column to store student count with default value of 0
+    exam_id INTEGER DEFAULT 0, -- Column to store exam ID with default value of 0
+    grade DOUBLE PRECISION, -- Column to store grade as a double precision floating point number
+    step VARCHAR(50), -- Column to store the profile step (Enum type) as a string (suitable length)
+    role VARCHAR(50), -- Column to store the profile role (Enum type) as a string (suitable length)
+    finished_option_count INTEGER DEFAULT 0, -- Column to store finished option count with default value of 0
+    random_test_id VARCHAR(255), -- Column to store random test ID (suitable length for IDs)
+    options VARCHAR(255) DEFAULT 'test-', -- Column to store options with default value of 'test-'
+    last_message_id INTEGER DEFAULT 0, -- Column to store the last message ID with default value of 0
+    file_name VARCHAR(255), -- Column to store file name (suitable length for file names)
+    exam_finished_student_count INTEGER DEFAULT 0, -- Column to store finished student count with default value of 0
+    student_list_to_string TEXT , -- Column to store student list as a string with default value
+    visible BOOLEAN DEFAULT FALSE -- Column to store visibility status with default value of false
+);

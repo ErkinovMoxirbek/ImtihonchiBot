@@ -1,8 +1,7 @@
 package com.example.controller;
 
 import com.example.MyTelegramBot;
-import com.example.entity.StudentProfileEntity;
-import com.example.entity.TeacherProfileEntity;
+import com.example.entity.ProfileEntity;
 import com.example.enums.ProfileStep;
 import com.example.repository.StudentRepository;
 import com.example.repository.TeacherRepository;
@@ -22,7 +21,7 @@ public class CallBackController {
 
     public void handle(String text,Message message){
         if (text.startsWith("start/")){
-            TeacherProfileEntity entity = teacherRepository.findById(message.getChatId());
+            ProfileEntity entity = teacherRepository.findById(message.getChatId());
             entity.setStep(ProfileStep.DONE);
             teacherRepository.update(entity);
             Integer examId = Integer.valueOf(text.split("/")[1]);
@@ -30,7 +29,7 @@ public class CallBackController {
             deleteMessage.setChatId(message.getChatId());
             deleteMessage.setMessageId(message.getMessageId());
             myTelegramBot.deleteMsg(deleteMessage);
-            for (StudentProfileEntity s : studentRepository.findAll()){
+            for (ProfileEntity s : studentRepository.findAll()){
                 if (s.getExamId().equals(examId)){
                     EditMessageText editMessageText = new EditMessageText();
                     editMessageText.setChatId(s.getProfileId());
@@ -42,7 +41,7 @@ public class CallBackController {
             examService.sendStudentTest(message,examId);
         } else if (text.startsWith("option/")) {
             String [] arr = text.split("/");
-            StudentProfileEntity entity = studentRepository.findById(message.getChatId());
+            ProfileEntity entity = studentRepository.findById(message.getChatId());
             entity.setStep(ProfileStep.Question);
             studentRepository.update(entity);
             examService.checkOption(message,arr[1],arr[2],arr[3]);

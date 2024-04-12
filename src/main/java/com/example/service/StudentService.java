@@ -1,8 +1,8 @@
 package com.example.service;
 
 import com.example.MyTelegramBot;
-import com.example.entity.StudentProfileEntity;
-import com.example.entity.TeacherProfileEntity;
+import com.example.entity.ProfileEntity;
+import com.example.enums.ProfileRole;
 import com.example.enums.ProfileStep;
 import com.example.repository.StudentRepository;
 import com.example.repository.TeacherRepository;
@@ -28,12 +28,15 @@ public class StudentService {
     private TestRepository testRepository;
 
     public void enterExamId(Message message) {
-        StudentProfileEntity entity = new StudentProfileEntity();
+        ProfileEntity entity = new ProfileEntity();
         entity.setProfileId(message.getChatId());
         entity.setGrade(0.0);
         entity.setStep(ProfileStep.ENTER_EXAM_ID);
+        entity.setRole(ProfileRole.STUDENT);
         entity.setVisible(Boolean.TRUE);
-        if (studentRepository.findById(message.getChatId()) == null){
+        if ((teacherRepository.findByIdAndRole(message.getChatId(),ProfileRole.DONE) == null
+                && teacherRepository.findByIdAndRole(message.getChatId(),ProfileRole.TEACHER) == null
+                && teacherRepository.findByIdAndRole(message.getChatId(),ProfileRole.STUDENT) == null)){
             studentRepository.save(entity);
         }else {
             studentRepository.update(entity);
@@ -42,7 +45,7 @@ public class StudentService {
     }
 
     public void enterName(Message message) {
-        StudentProfileEntity dto = studentRepository.findById(message.getChatId());
+        ProfileEntity dto = studentRepository.findById(message.getChatId());
         dto.setStep(ProfileStep.ENTER_NAME);
         dto.setExamId(Integer.valueOf(message.getText()));
         studentRepository.update(dto);
@@ -50,7 +53,7 @@ public class StudentService {
     }
 
     public void enterSurname(Message message) {
-        StudentProfileEntity entity = studentRepository.findById(message.getChatId());
+        ProfileEntity entity = studentRepository.findById(message.getChatId());
         entity.setStep(ProfileStep.ENTER_SURNAME);
         entity.setName(message.getText());
         studentRepository.update(entity);
@@ -61,8 +64,8 @@ public class StudentService {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                StudentProfileEntity studentProfileEntity = studentRepository.findById(message.getChatId());
-                TeacherProfileEntity teacherProfileEntity = teacherRepository.findByExamId(studentProfileEntity.getExamId());
+                ProfileEntity studentProfileEntity = studentRepository.findById(message.getChatId());
+                ProfileEntity teacherProfileEntity = teacherRepository.findByExamId(studentProfileEntity.getExamId());
                 studentProfileEntity.setStep(ProfileStep.Question);
                 studentProfileEntity.setSurname(message.getText());
                 studentProfileEntity.setRandomTestId(randomTest(testRepository.getListExel(teacherProfileEntity.getFileName()).size()));

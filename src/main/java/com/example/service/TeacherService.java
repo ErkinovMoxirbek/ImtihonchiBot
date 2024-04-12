@@ -1,7 +1,8 @@
 package com.example.service;
 
 import com.example.MyTelegramBot;
-import com.example.entity.TeacherProfileEntity;
+import com.example.entity.ProfileEntity;
+import com.example.enums.ProfileRole;
 import com.example.enums.ProfileStep;
 import com.example.repository.TeacherRepository;
 import com.example.util.InlineKeyBoardUtil;
@@ -18,9 +19,10 @@ public class TeacherService {
     private MyTelegramBot myTelegramBot;
     private TeacherRepository teacherRepository;
     public void helloTeacher(Message message){
-        TeacherProfileEntity entity = new TeacherProfileEntity();
+        ProfileEntity entity = new ProfileEntity();
         entity.setProfileId(message.getChatId());
         entity.setStep(ProfileStep.ENTER_GROUP);
+        entity.setRole(ProfileRole.TEACHER);
         Random random = new Random();
         entity.setExamId(random.nextInt(100000,999999));
         entity.setStudentCount(0);
@@ -28,7 +30,9 @@ public class TeacherService {
         entity.setLastMessageId(0);
         entity.setVisible(Boolean.TRUE);
 
-        if (teacherRepository.findById(message.getChatId()) == null){
+        if (teacherRepository.findByIdAndRole(message.getChatId(),ProfileRole.DONE) == null
+                && teacherRepository.findByIdAndRole(message.getChatId(),ProfileRole.TEACHER) == null
+                && teacherRepository.findByIdAndRole(message.getChatId(),ProfileRole.STUDENT) == null){
             teacherRepository.save(entity);
         }else {
             teacherRepository.update(entity);
@@ -36,7 +40,7 @@ public class TeacherService {
         myTelegramBot.sendMessage("Guruhni kiriting!",message.getChatId(), ReplyKeyboardUtil.cancel());
     }
     public void enterExel(Message message){
-        TeacherProfileEntity entity = teacherRepository.findById(message.getChatId());
+        ProfileEntity entity = teacherRepository.findById(message.getChatId());
         entity.setGroup(message.getText());
         entity.setStep(ProfileStep.ENTER_EXEL);
         SendMessage sendMessage = new SendMessage();

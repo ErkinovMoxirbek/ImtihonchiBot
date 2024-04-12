@@ -1,8 +1,7 @@
 package com.example.repository;
 
 import com.example.dto.TestDTO;
-import com.example.entity.StudentProfileEntity;
-import com.example.entity.TeacherProfileEntity;
+import com.example.entity.ProfileEntity;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -10,7 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 public class ExelRepository {
-    public Workbook createTeacherExel(TeacherProfileEntity teacherProfileEntity){
+    public Workbook createTeacherExel(ProfileEntity teacherProfileEntity){
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Jadval");
 
@@ -36,13 +35,13 @@ public class ExelRepository {
         return workbook;
     }
 
-    public void saveStudentExel(List<StudentProfileEntity> list, TeacherProfileEntity teacherProfileEntity, String group, List<TestDTO>testDTOS) {
+    public void saveStudentExel(List<ProfileEntity> list, ProfileEntity teacherProfileEntity, String group, List<TestDTO>testDTOS) {
         int row = 3;
         String fileName = "Base/" + group + "_Exammer.xlsx";
         Workbook workbook = createTeacherExel(teacherProfileEntity);
         Sheet sheet = workbook.getSheet("Jadval");
 
-        for (StudentProfileEntity studentProfileEntity : list) {
+        for (ProfileEntity studentProfileEntity : list) {
             if (studentProfileEntity.getExamId().equals(teacherProfileEntity.getExamId())){
                 Row dataRow = sheet.createRow(row);
 

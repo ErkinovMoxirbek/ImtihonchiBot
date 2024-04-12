@@ -1,7 +1,7 @@
 package com.example.service;
 
 import com.example.MyTelegramBot;
-import com.example.entity.TeacherProfileEntity;
+import com.example.entity.ProfileEntity;
 import com.example.enums.ProfileStep;
 import com.example.repository.TeacherRepository;
 import com.example.util.ReplyKeyboardUtil;
@@ -54,7 +54,7 @@ public class ExelFileService {
                             sendMessage1.setReplyMarkup(ReplyKeyboardUtil.endExam());
                             sendMessage1.setChatId(message.getChatId());
                             myTelegramBot.sendMsg(sendMessage1);
-                            TeacherProfileEntity entity = teacherRepository.findById(message.getChatId());
+                            ProfileEntity entity = teacherRepository.findById(message.getChatId());
                             entity.setStep(ProfileStep.EXAM);
                             teacherRepository.update(entity);
                         } else {
@@ -124,7 +124,7 @@ public class ExelFileService {
         return myTelegramBot.sendMsg(sendMessage);
     }
     public void infoExel(Message message){
-        TeacherProfileEntity dto = teacherRepository.findById(message.getChatId());
+        ProfileEntity dto = teacherRepository.findById(message.getChatId());
         if (dto.getLastMessageId() != null){
             try {
                 DeleteMessage deleteMessage = new DeleteMessage();

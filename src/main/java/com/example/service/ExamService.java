@@ -2,8 +2,8 @@ package com.example.service;
 
 import com.example.MyTelegramBot;
 import com.example.dto.TestDTO;
-import com.example.entity.StudentProfileEntity;
-import com.example.entity.TeacherProfileEntity;
+import com.example.entity.ProfileEntity;
+import com.example.enums.ProfileRole;
 import com.example.enums.ProfileStep;
 import com.example.repository.ExelRepository;
 import com.example.repository.StudentRepository;
@@ -30,8 +30,8 @@ public class ExamService {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                List<StudentProfileEntity> studentProfileEntityList = studentRepository.findAll();
-                for (StudentProfileEntity s : studentProfileEntityList) {
+                List<ProfileEntity> studentProfileEntityList = studentRepository.findAll();
+                for (ProfileEntity s : studentProfileEntityList) {
                     String[] randomArr = s.getRandomTestId().split("-");
                     if (s.getStep().equals(ProfileStep.Question)) {
                         if (s.getExamId().equals(examId) &&
@@ -46,7 +46,7 @@ public class ExamService {
                     }
                     if (s.getFinishedOptionCount().equals(s.getRandomTestId().split("-").length) && !s.getStep().equals(ProfileStep.DONE)) {
                         myTelegramBot.sendMessage("Savollar yakunlandi.", s.getProfileId());
-                        TeacherProfileEntity entity = teacherRepository.findByExamId(examId);
+                        ProfileEntity entity = teacherRepository.findByExamId(examId);
                         entity.setExamFinishedStudentCount(entity.getExamFinishedStudentCount() + 1);
                         teacherRepository.update(entity);
                         s.setStep(ProfileStep.DONE);
@@ -73,7 +73,7 @@ public class ExamService {
         if (count < 2)return null;
         return count;
     }
-    public void sendStudentEndExam(StudentProfileEntity s, String group){
+    public void sendStudentEndExam(ProfileEntity s, String group){
         myTelegramBot.sendMessage("Ism: " + s.getName() + "; \n" + "Familiya: " + s.getSurname() + "; \n" + "Guruh: " + group + "; \n" + "Umumiy ball: " + s.getGrade() + "; ",s.getProfileId());
         myTelegramBot.sendMessage("Ajoyib! \nImtihon tugadi.",s.getProfileId(), ReplyKeyboardUtil.menuKeyboard());
         s.setStep(ProfileStep.DONE);
@@ -82,7 +82,7 @@ public class ExamService {
 
 
     public void checkOption(Message message, String answer, String examId, String optionId) {
-        StudentProfileEntity studentProfileEntity = studentRepository.findById(message.getChatId());
+        ProfileEntity studentProfileEntity = studentRepository.findById(message.getChatId());
         if (!studentProfileEntity.getStep().equals(ProfileStep.Question)){
             return;
         }
@@ -113,11 +113,11 @@ public class ExamService {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                TeacherProfileEntity teacherProfileEntity = teacherRepository.findById(teacherId);
+                ProfileEntity teacherProfileEntity = teacherRepository.findById(teacherId);
                 teacherProfileEntity.setExamFinishedStudentCount(teacherProfileEntity.getStudentCount());
                 teacherRepository.update(teacherProfileEntity);
-                List<StudentProfileEntity> studentList = studentRepository.findAll();
-                for (StudentProfileEntity s : studentList) {
+                List<ProfileEntity> studentList = studentRepository.findAll();
+                for (ProfileEntity s : studentList) {
                     if (s.getExamId().equals(teacherProfileEntity.getExamId())) {
                         Integer arrCount = s.getRandomTestId().split("-").length;
                         String str = "";
@@ -171,7 +171,7 @@ public class ExamService {
                     exelRepository.saveStudentExel(studentRepository.findAll(), teacherRepository.findByExamId(examId), teacherRepository.findByExamId(examId).getGroup(),list);
                     bool = sendExelTeacherService.sendDoc(teacherRepository.findByExamId(examId).getGroup(), teacherRepository.findByExamId(examId).getProfileId(), teacherRepository.findByExamId(examId).getFileName());
                 }
-                for (StudentProfileEntity s : studentRepository.findAll()) {
+                for (ProfileEntity s : studentRepository.findAll()) {
                     if (s.getExamId().equals(examId)) {
                         sendStudentEndExam(s, teacherRepository.findByExamId(examId).getGroup());
                     }
@@ -181,12 +181,13 @@ public class ExamService {
                     myTelegramBot.deleteExcelFile(teacherRepository.findByExamId(examId).getGroup() + "_Exammer.xlsx");
                     myTelegramBot.deleteExcelFile(teacherRepository.findByExamId(examId).getFileName());
                 }
-                for (StudentProfileEntity s : studentRepository.findAll()) {
+                for (ProfileEntity s : studentRepository.findAll()) {
                     if (s.getExamId().equals(examId)) {
                         s.setStep(ProfileStep.DONE);
                         s.setGrade(0.0);
                         s.setExamId(null);
                         s.setOptions(null);
+                        s.setRole(ProfileRole.DONE);
                         s.setFinishedOptionCount(0);
                         s.setLastMessageId(null);
                         s.setRandomTestId(null);
@@ -194,13 +195,14 @@ public class ExamService {
                         studentRepository.update(s);
                     }
                 }
-                TeacherProfileEntity entity = teacherRepository.findByExamId(examId);
+                ProfileEntity entity = teacherRepository.findByExamId(examId);
                 entity.setExamFinishedStudentCount(0);
                 entity.setStep(ProfileStep.DONE);
                 entity.setGroup(null);
                 entity.setVisible(Boolean.FALSE);
                 entity.setFileName(null);
                 entity.setLastMessageId(null);
+                entity.setRole(ProfileRole.DONE);
                 entity.setStudentListToString(null);
                 entity.setExamId(null);
                 entity.setStudentCount(null);

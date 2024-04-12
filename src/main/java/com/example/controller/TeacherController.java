@@ -1,7 +1,8 @@
 package com.example.controller;
 
 import com.example.MyTelegramBot;
-import com.example.entity.TeacherProfileEntity;
+import com.example.entity.ProfileEntity;
+import com.example.enums.ProfileRole;
 import com.example.enums.ProfileStep;
 import com.example.repository.TeacherRepository;
 import com.example.service.ExamService;
@@ -19,16 +20,17 @@ public class TeacherController {
             teacherService.helloTeacher(message);
         }
         else if (message.getText().equals("❌ Bekor qilish")) {
-            TeacherProfileEntity entity = teacherRepository.findById(message.getChatId());
+            ProfileEntity entity = teacherRepository.findById(message.getChatId());
             entity.setExamFinishedStudentCount(0);
             entity.setStep(ProfileStep.DONE);
             entity.setGroup(null);
             entity.setVisible(Boolean.FALSE);
+            entity.setRole(ProfileRole.DONE);
             entity.setFileName(null);
-            entity.setLastMessageId(null);
+            entity.setLastMessageId(0);
             entity.setStudentListToString(null);
-            entity.setExamId(null);
-            entity.setStudentCount(null);
+            entity.setExamId(0);
+            entity.setStudentCount(0);
             teacherRepository.update(entity);
             message.setText("/start");
             mainController.handle(message);
